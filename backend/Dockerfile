@@ -8,5 +8,10 @@ FROM eclipse-temurin:17-jre
 WORKDIR /app
 ENV SPRING_PROFILES_ACTIVE=prod
 COPY --from=build /app/target/*.jar app.jar
-EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+EXPOSE 10000
+ENTRYPOINT ["java", \
+  "-Xmx256m", \
+  "-Xms128m", \
+  "-XX:+UseSerialGC", \
+  "-Dserver.port=${PORT:-10000}", \
+  "-jar", "/app/app.jar"]

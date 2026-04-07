@@ -5,9 +5,12 @@ services:
     rootDir: .
     plan: free
     autoDeploy: true
+    healthCheckPath: /api/auth/status
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
+      - key: PORT
+        value: 10000
       - key: DATABASE_URL
         sync: false
       - key: DATABASE_USERNAME
@@ -18,3 +21,7 @@ services:
         generateValue: true
       - key: CORS_ALLOWED_ORIGINS
         sync: false
+      - key: AUTH_SETUP_ENABLED
+        value: "true"
+      - key: AUTH_PUBLIC_SIGNUP_ENABLED
+        value: "true"
