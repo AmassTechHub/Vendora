@@ -130,7 +130,7 @@ export default function Login() {
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 mb-1">Create account</h2>
                 <p className="text-sm text-gray-500 mb-4">
-                  {!hasUsers ? '🎉 You\'re the first user — you\'ll be ADMIN.' : 'Enter your invite code to register.'}
+                  Fill in your details to get started.
                 </p>
               </div>
               <div>
@@ -145,10 +145,10 @@ export default function Login() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Invite Code {!hasUsers && <span className="text-gray-400 font-normal">(not needed for first account)</span>}
+                  Invite Code {!hasUsers && <span className="text-gray-400 font-normal text-xs">(not required for first account)</span>}
                 </label>
                 <input type="text" className={`${inputClass} uppercase tracking-widest`}
-                  placeholder={hasUsers ? 'ABCD-1234' : 'Leave blank'}
+                  placeholder={hasUsers ? 'Enter invite code' : 'Leave blank if first account'}
                   value={registerForm.inviteCode}
                   onChange={e => setRegisterForm({ ...registerForm, inviteCode: e.target.value })} />
               </div>
