@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface RefundRepository extends JpaRepository<Refund, Long> {
     List<Refund> findAllByOrderByCreatedAtDesc();
-    List<Refund> findBySaleIdOrderByCreatedAtDesc(Long saleId);
+    List<Refund> findBySale_IdOrderByCreatedAtDesc(Long saleId);
 }
