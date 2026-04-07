@@ -17,6 +17,7 @@ import Expenses from './pages/Expenses';
 import Refunds from './pages/Refunds';
 import Suppliers from './pages/Suppliers';
 import Shifts from './pages/Shifts';
+import Settings from './pages/Settings';
 
 function ProtectedRoute({ children, roles }) {
   const { user } = useAuth();
@@ -43,6 +44,7 @@ function AppRoutes() {
       <Route path="/admin/users"     element={<ProtectedRoute roles={['ADMIN']}><AdminUsers /></ProtectedRoute>} />
       <Route path="/admin/audit-logs" element={<ProtectedRoute roles={['ADMIN']}><AuditLogs /></ProtectedRoute>} />
       <Route path="/account"         element={<ProtectedRoute><Account /></ProtectedRoute>} />
+      <Route path="/settings"        element={<ProtectedRoute roles={['ADMIN', 'MANAGER']}><Settings /></ProtectedRoute>} />
       <Route path="*"                element={<Navigate to="/login" />} />
     </Routes>
   );

@@ -6,7 +6,7 @@ import {
   ShoppingCart, Package, Users, BarChart2, Settings, LogOut,
   LayoutDashboard, UserCircle2, ShieldCheck, ReceiptText,
   TrendingDown, RotateCcw, Truck, Clock, Sun, Moon, Menu, X,
-  Store, ChevronRight
+  Store, ChevronRight, Sliders
 } from 'lucide-react';
 
 const roleColors = {
@@ -27,6 +27,7 @@ const navItems = [
   { to: '/expenses',         label: 'Expenses',      icon: TrendingDown,    roles: ['ADMIN', 'MANAGER'] },
   { to: '/reports',          label: 'Reports',       icon: BarChart2,       roles: ['ADMIN', 'MANAGER'] },
   { to: '/account',          label: 'My Account',    icon: UserCircle2,     roles: ['ADMIN', 'MANAGER', 'CASHIER'] },
+  { to: '/settings',         label: 'Settings',      icon: Sliders,         roles: ['ADMIN', 'MANAGER'] },
   { to: '/admin/users',      label: 'Users',         icon: Settings,        roles: ['ADMIN'] },
   { to: '/admin/audit-logs', label: 'Audit Logs',    icon: ShieldCheck,     roles: ['ADMIN'] },
 ];
