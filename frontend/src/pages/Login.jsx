@@ -20,8 +20,6 @@ export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const [backendStatus, setBackendStatus] = useState('checking');
-
   useEffect(() => {
     api.get('/auth/status').then(({ data }) => {
       setHasUsers(Boolean(data?.hasUsers));
