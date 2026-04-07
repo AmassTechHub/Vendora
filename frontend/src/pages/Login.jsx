@@ -16,14 +16,21 @@ export default function Login() {
   const [hasUsers, setHasUsers] = useState(true);
   const [signupEnabled, setSignupEnabled] = useState(true);
   const [mode, setMode] = useState('signin');
+  const [backendStatus, setBackendStatus] = useState('checking');
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  const [backendStatus, setBackendStatus] = useState('checking');
 
   useEffect(() => {
     api.get('/auth/status').then(({ data }) => {
       setHasUsers(Boolean(data?.hasUsers));
       setSignupEnabled(data?.publicSignupEnabled !== false);
-    }).catch(() => {});
+      setBackendStatus('online');
+    }).catch((err) => {
+      console.error('Backend unreachable:', err.message);
+      setBackendStatus('offline');
+    });
   }, []);
 
   const handleSubmit = async (e) => {
@@ -55,7 +62,9 @@ export default function Login() {
       setRegisterForm({ username: '', fullName: '', password: '', confirmPassword: '', inviteCode: '' });
       setMode('signin');
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Account creation failed');
+      const msg = err.response?.data?.error || err.message || 'Account creation failed';
+      toast.error(msg);
+      console.error('Register error:', err.response?.data || err.message);
     } finally { setLoading(false); }
   };
 
@@ -172,6 +181,19 @@ export default function Login() {
           <p className="text-center text-xs text-gray-400 mt-6">
             Vendora POS · Secure & Role-Based Access
           </p>
+          {/* Backend status */}
+          <div className={`flex items-center justify-center gap-1.5 mt-3 text-xs ${
+            backendStatus === 'online' ? 'text-green-500' :
+            backendStatus === 'offline' ? 'text-red-500' : 'text-gray-400'
+          }`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${
+              backendStatus === 'online' ? 'bg-green-500' :
+              backendStatus === 'offline' ? 'bg-red-500 animate-pulse' : 'bg-gray-400 animate-pulse'
+            }`} />
+            {backendStatus === 'online' ? 'Backend connected' :
+             backendStatus === 'offline' ? 'Backend unreachable — check Render deployment' :
+             'Connecting to backend...'}
+          </div>
         </div>
       </div>
 
