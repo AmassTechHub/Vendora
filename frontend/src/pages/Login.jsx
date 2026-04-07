@@ -181,19 +181,6 @@ export default function Login() {
           <p className="text-center text-xs text-gray-400 mt-6">
             Vendora POS · Secure & Role-Based Access
           </p>
-          {/* Backend status */}
-          <div className={`flex items-center justify-center gap-1.5 mt-3 text-xs ${
-            backendStatus === 'online' ? 'text-green-500' :
-            backendStatus === 'offline' ? 'text-red-500' : 'text-gray-400'
-          }`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${
-              backendStatus === 'online' ? 'bg-green-500' :
-              backendStatus === 'offline' ? 'bg-red-500 animate-pulse' : 'bg-gray-400 animate-pulse'
-            }`} />
-            {backendStatus === 'online' ? 'Backend connected' :
-             backendStatus === 'offline' ? 'Backend unreachable — check Render deployment' :
-             'Connecting to backend...'}
-          </div>
         </div>
       </div>
 
