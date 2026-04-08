@@ -246,6 +246,46 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
     }
 
+    /**
+     * Emergency admin reset — only works when ADMIN_RESET_TOKEN env var is set.
+     * Set ADMIN_RESET_TOKEN on Render, call this once, then remove the env var.
+     */
+    @PostMapping("/emergency-reset")
+    public ResponseEntity<?> emergencyReset(
+            @RequestBody Map<String, String> body,
+            HttpServletRequest request
+    ) {
+        String resetToken = System.getenv("ADMIN_RESET_TOKEN");
+        if (resetToken == null || resetToken.isBlank()) {
+            return ResponseEntity.status(403).body(Map.of("error", "Emergency reset is disabled"));
+        }
+        if (!resetToken.equals(body.get("resetToken"))) {
+            return ResponseEntity.status(403).body(Map.of("error", "Invalid reset token"));
+        }
+        String newPassword = body.get("newPassword");
+        String username    = body.get("username");
+        if (newPassword == null || newPassword.length() < 8) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Password must be at least 8 characters"));
+        }
+        User user = userRepository.findAll().stream()
+                .filter(u -> username == null || u.getUsername().equals(username))
+                .findFirst()
+                .orElse(null);
+        if (user == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "No user found"));
+        }
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setFailedLoginAttempts(0);
+        user.setLockoutUntil(null);
+        userRepository.save(user);
+        auditLogService.log(null, request, "EMERGENCY_RESET", "USER", user.getUsername(), "Password reset via emergency endpoint", "SUCCESS");
+        return ResponseEntity.ok(Map.of(
+            "message", "Password reset successfully",
+            "username", user.getUsername(),
+            "role", user.getRole().name()
+        ));
+    }
+
     @GetMapping("/me")
     public ResponseEntity<?> me(Authentication auth) {
         if (auth == null || auth.getName() == null) {

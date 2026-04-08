@@ -45,7 +45,8 @@ public class SecurityConfig {
                         "/api/auth/setup",
                         "/api/auth/status",
                         "/api/auth/refresh",
-                        "/api/auth/logout"
+                        "/api/auth/logout",
+                        "/api/auth/emergency-reset"
                 ).permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/reports/**").hasAnyRole("ADMIN", "MANAGER")
