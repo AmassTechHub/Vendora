@@ -187,7 +187,7 @@ export default function Login() {
             </form>
           )}
 
-          <p className="text-center text-xs text-gray-300 mt-8">Vendora POS · Secure & Role-Based</p>
+          <p className="text-center text-xs text-gray-300 mt-8">Vendora POS · Secure & Role-Based Access</p>
         </div>
       </div>
 
@@ -223,7 +223,7 @@ export default function Login() {
           </div>
 
           <div className="mt-12 pt-8 border-t border-white/5">
-            <p className="text-xs text-gray-600">Powered by Spring Boot · React · Supabase · Paystack</p>
+            <p className="text-xs text-gray-600">© 2026 Vendora POS</p>
           </div>
         </div>
       </div>
