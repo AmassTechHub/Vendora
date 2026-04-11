@@ -23,13 +23,16 @@ public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
     private final String allowedOrigins;
+    private final String allowedOriginPatterns;
 
     public SecurityConfig(
             JwtFilter jwtFilter,
-            @Value("${cors.allowed-origins:http://localhost:3000,http://localhost:5173}") String allowedOrigins
+            @Value("${cors.allowed-origins:http://localhost:3000,http://localhost:5173}") String allowedOrigins,
+            @Value("${cors.allowed-origin-patterns:}") String allowedOriginPatterns
     ) {
         this.jwtFilter = jwtFilter;
         this.allowedOrigins = allowedOrigins;
+        this.allowedOriginPatterns = allowedOriginPatterns;
     }
 
     @Bean
@@ -64,10 +67,20 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(Arrays.stream(allowedOrigins.split(","))
+        var origins = Arrays.stream(allowedOrigins.split(","))
                 .map(String::trim)
                 .filter(origin -> !origin.isBlank())
-                .toList());
+                .toList();
+        if (!origins.isEmpty()) {
+            config.setAllowedOrigins(origins);
+        }
+        var patterns = Arrays.stream(allowedOriginPatterns.split(","))
+                .map(String::trim)
+                .filter(p -> !p.isBlank())
+                .toList();
+        if (!patterns.isEmpty()) {
+            config.setAllowedOriginPatterns(patterns);
+        }
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

@@ -3,8 +3,8 @@
 /* Define dark mode variant — Tailwind v4 uses @custom-variant */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Smooth theme transitions */
-*, *::before, *::after {
+/* Smooth theme transitions (exclude form controls to avoid focus/input quirks) */
+:root, body, div, span, p, h1, h2, h3, h4, h5, h6, a, li, ul, ol, nav, header, footer, main, section, article, aside, table, thead, tbody, tr, th, td, svg, path {
   transition-property: background-color, border-color, color;
   transition-duration: 150ms;
   transition-timing-function: ease;

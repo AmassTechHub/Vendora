@@ -69,19 +69,24 @@ mvn spring-boot:run
 1. Push to GitHub
 2. Import repo in Vercel
 3. Set root directory to `Pos/frontend`
-4. Add env vars: `VITE_API_BASE_URL`, `VITE_PAYSTACK_PUBLIC_KEY`
+4. **Required:** `VITE_API_BASE_URL` = your Render API base including `/api`, e.g. `https://your-service.onrender.com/api` (if this is missing, the app calls localhost and every screen fails).
+5. `VITE_PAYSTACK_PUBLIC_KEY` (optional, for card/mobile money)
 
 ### Backend → Render
 1. Push to GitHub
 2. New Web Service in Render → connect repo
 3. Set root directory to `Pos/backend`
 4. Runtime: Docker
-5. Add env vars from `.env.example`
+5. Env vars from `backend/.env.example`, especially `SPRING_PROFILES_ACTIVE=prod`, `DATABASE_*`, `JWT_SECRET`, and **`CORS_ALLOWED_ORIGINS`** including your exact Vercel URL (e.g. `https://vendora-afrik.vercel.app`). Production also allows `https://*.vercel.app` via `CORS_ALLOWED_ORIGIN_PATTERNS` for preview deployments.
 
 ## First Login
 
 On first run, visit `/login` → "Create Account" → first account auto-becomes ADMIN.
 After that, new accounts require an invite code (generated from Users page).
+
+## Demo / presentation data (optional)
+
+After the API and database work, you can add sample suppliers, customers, and products by running `scripts/demo-seed-postgres.sql` once in the Supabase SQL editor (or any PostgreSQL client). For a live demo with the lecturer, pre-seeded data avoids empty screens; adding one customer on the spot also shows the UI clearly.
 
 ## Payment Methods
 

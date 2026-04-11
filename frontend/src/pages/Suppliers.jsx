@@ -35,7 +35,7 @@ export default function Suppliers() {
         toast.success('Supplier added');
       }
       setForm(empty); setEditing(null); setShowForm(false); load();
-    } catch { toast.error('Failed to save supplier'); }
+    } catch (err) { toast.error(err.response?.data?.error || 'Failed to save supplier'); }
   };
 
   const handleDelete = async (id) => {
@@ -125,8 +125,16 @@ export default function Suppliers() {
       )}
 
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md shadow-xl">
+        <div
+          className="fixed inset-0 z-[100] flex justify-center overflow-y-auto bg-black/50 p-4 sm:py-8"
+          role="dialog"
+          aria-modal="true"
+          onClick={(e) => e.target === e.currentTarget && setShowForm(false)}
+        >
+          <div
+            className="my-auto w-full max-w-md min-h-0 max-h-[min(90dvh,920px)] overflow-y-auto overscroll-contain rounded-xl bg-white p-6 shadow-xl dark:bg-gray-800"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h3 className="text-lg font-bold mb-4 dark:text-white">{editing ? 'Edit Supplier' : 'Add Supplier'}</h3>
             <form onSubmit={handleSubmit} className="space-y-3">
               {[

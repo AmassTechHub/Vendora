@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/axios';
+import toast from 'react-hot-toast';
 import StatCard from '../components/StatCard';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -55,9 +56,11 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [loadError, setLoadError] = useState(null);
 
   const load = useCallback(async (silent = false) => {
     if (silent) setRefreshing(true); else setLoading(true);
+    setLoadError(null);
     try {
       const [daily, ls, customers, products, trendData, topData, payData] = await Promise.all([
         api.get('/reports/daily'),
@@ -81,7 +84,12 @@ export default function Dashboard() {
       setLowStock(ls.data || []);
       setPay(Object.entries(payData.data || {}).map(([name, value]) => ({ name, value })));
       setLastUpdated(new Date());
-    } catch (err) { console.error('Dashboard error:', err); }
+    } catch (err) {
+      console.error('Dashboard error:', err);
+      const msg = err.response?.data?.error || err.message || 'Failed to load dashboard';
+      setLoadError(msg);
+      toast.error(msg);
+    }
     finally { setLoading(false); setRefreshing(false); }
   }, []);
 
@@ -102,6 +110,18 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-5">
+
+      {/* API error banner */}
+      {loadError && (
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 flex items-start gap-3">
+          <AlertTriangle size={16} className="text-red-500 shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-red-700 dark:text-red-400">Dashboard failed to load</p>
+            <p className="text-xs text-red-600 dark:text-red-500 mt-0.5 break-words">{loadError}</p>
+          </div>
+          <button onClick={() => load()} className="text-xs text-red-600 dark:text-red-400 font-semibold hover:underline shrink-0">Retry</button>
+        </div>
+      )}
 
       {/* Hero greeting */}
       <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm">

@@ -16,7 +16,7 @@ const ADJUST_REASONS = [
 
 const empty = { name: '', category: '', price: '', quantity: '', barcode: '', supplierId: '', lowStockThreshold: 10 };
 
-const inputClass = "w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 focus:bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white transition";
+const inputClass = "w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 focus:bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white";
 const labelClass = "block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1.5 uppercase tracking-wide";
 
 export default function Products() {
@@ -33,14 +33,18 @@ export default function Products() {
   const [customCategory, setCustomCategory] = useState('');
 
   const load = async () => {
-    const [{ data: prods }, { data: ls }, { data: sups }] = await Promise.all([
-      api.get('/products'),
-      api.get('/products/low-stock'),
-      api.get('/suppliers').catch(() => ({ data: [] }))
-    ]);
-    setProducts(prods);
-    setLowStock(ls);
-    setSuppliers(sups);
+    try {
+      const [{ data: prods }, { data: ls }, { data: sups }] = await Promise.all([
+        api.get('/products'),
+        api.get('/products/low-stock'),
+        api.get('/suppliers').catch(() => ({ data: [] })),
+      ]);
+      setProducts(prods);
+      setLowStock(ls);
+      setSuppliers(sups);
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to load products');
+    }
   };
 
   useEffect(() => { load(); }, []);
@@ -209,8 +213,21 @@ export default function Products() {
 
       {/* Add/Edit Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div
+          className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-black/50 p-4 sm:py-8"
+          role="dialog"
+          aria-modal="true"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowForm(false);
+              setCustomCategory('');
+            }
+          }}
+        >
+          <div
+            className="my-auto w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-800"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h3 className="text-lg font-bold mb-5 dark:text-white">{editing ? 'Edit Product' : 'Add Product'}</h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -288,8 +305,16 @@ export default function Products() {
 
       {/* Adjust Stock Modal */}
       {adjusting && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+        <div
+          className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-black/50 p-4 sm:py-8"
+          role="dialog"
+          aria-modal="true"
+          onClick={(e) => e.target === e.currentTarget && setAdjusting(null)}
+        >
+          <div
+            className="my-auto w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl dark:bg-gray-800"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h3 className="text-lg font-bold mb-1 dark:text-white">Adjust Stock</h3>
             <p className="text-sm text-gray-500 mb-4">{adjusting.name} · Current: <strong>{adjusting.quantity}</strong></p>
             <form onSubmit={submitAdjustment} className="space-y-4">

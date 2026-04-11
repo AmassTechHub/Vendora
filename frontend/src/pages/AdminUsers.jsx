@@ -247,8 +247,16 @@ export default function AdminUsers() {
 
       {/* Create user modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-md shadow-2xl border dark:border-gray-700">
+        <div
+          className="fixed inset-0 z-[100] flex justify-center overflow-y-auto bg-black/60 p-4 sm:py-8"
+          role="dialog"
+          aria-modal="true"
+          onClick={(e) => e.target === e.currentTarget && setShowForm(false)}
+        >
+          <div
+            className="my-auto w-full max-w-md min-h-0 max-h-[min(90dvh,920px)] overflow-y-auto overscroll-contain rounded-2xl border bg-white p-6 shadow-2xl dark:border-gray-700 dark:bg-gray-800"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-lg font-black text-gray-900 dark:text-white">Create User</h3>
               <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-white transition">

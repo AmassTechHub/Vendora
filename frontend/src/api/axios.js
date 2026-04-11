@@ -2,7 +2,7 @@ import axios from 'axios';
 import { clearAuthSession, getAccessToken, getRefreshToken, setAuthSession } from '../lib/authStorage';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:10000/api',
 });
 
 let isRefreshing = false;
@@ -22,9 +22,23 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+function attachNetworkHint(err) {
+  if (!err.response && err.request) {
+    err.response = {
+      status: 0,
+      data: {
+        error:
+          'Cannot reach the API. On Vercel set VITE_API_BASE_URL to your backend URL ending in /api (e.g. https://your-app.onrender.com/api). On Render set CORS_ALLOWED_ORIGINS to your Vercel URL.',
+      },
+    };
+  }
+  return err;
+}
+
 api.interceptors.response.use(
   (res) => res,
   async (err) => {
+    attachNetworkHint(err);
     const originalRequest = err.config;
     const isAuthEndpoint = originalRequest?.url?.includes('/auth/login')
       || originalRequest?.url?.includes('/auth/refresh');

@@ -4,18 +4,20 @@ Spring Boot backend for Vendora POS.
 
 ## Environment
 
-Copy `.env.example` values into your runtime environment:
+### Local (SQLite)
 
-- `JWT_SECRET`
-- `CORS_ALLOWED_ORIGINS`
-- `AUTH_SETUP_ENABLED`
-- `AUTH_PUBLIC_SIGNUP_ENABLED`
-- `JWT_ACCESS_TOKEN_EXPIRATION`
-- `AUTH_REFRESH_TOKEN_EXPIRATION`
-- `AUTH_MAX_LOGIN_ATTEMPTS`
-- `AUTH_LOCK_MINUTES`
-- `PAYSTACK_SECRET_KEY`
-- `PAYSTACK_PUBLIC_KEY`
+Default profile is `local` — database file `pos.db` in this directory. No extra config.
+
+### Local → Supabase (PostgreSQL)
+
+1. In Supabase: **Project Settings → Database** — copy the **database password** and build a JDBC URL (see comments in `.env.example`).
+2. Copy `.env.example` to `.env` in this folder and set `SPRING_PROFILES_ACTIVE=prod`, `DATABASE_URL`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`, and a strong `JWT_SECRET`.
+3. Run from **this directory**: `mvn spring-boot:run`  
+   On startup, `.env` is loaded into JVM properties (real OS environment variables still win over `.env`).
+
+### Render / CI
+
+Set the same variables in the host environment (no `.env` file on the server). See `render.yaml`.
 
 ## Run
 
