@@ -62,14 +62,15 @@ export default function Dashboard() {
     if (silent) setRefreshing(true); else setLoading(true);
     setLoadError(null);
     try {
+      // Fire all requests individually — partial failures won't kill the whole dashboard
       const [daily, ls, customers, products, trendData, topData, payData] = await Promise.all([
-        api.get('/reports/daily'),
-        api.get('/products/low-stock'),
-        api.get('/customers'),
-        api.get('/products'),
-        api.get('/reports/trend'),
-        api.get('/reports/top-products?limit=5'),
-        api.get('/reports/payment-breakdown'),
+        api.get('/reports/daily').catch(() => ({ data: { totalSales: 0, totalRevenue: 0, averageSaleValue: 0 } })),
+        api.get('/products/low-stock').catch(() => ({ data: [] })),
+        api.get('/customers').catch(() => ({ data: [] })),
+        api.get('/products').catch(() => ({ data: [] })),
+        api.get('/reports/trend').catch(() => ({ data: [] })),
+        api.get('/reports/top-products?limit=5').catch(() => ({ data: [] })),
+        api.get('/reports/payment-breakdown').catch(() => ({ data: {} })),
       ]);
       setStats({
         todaySales: daily.data.totalSales || 0,

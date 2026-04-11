@@ -43,7 +43,10 @@ api.interceptors.response.use(
     const isAuthEndpoint = originalRequest?.url?.includes('/auth/login')
       || originalRequest?.url?.includes('/auth/refresh');
 
-    if (err.response?.status === 401 && !originalRequest?._retry && !isAuthEndpoint) {
+    const status = err.response?.status;
+
+    // 401 = expired token, 403 from Spring Security (no auth set) = also treat as expired
+    if ((status === 401 || status === 403) && !originalRequest?._retry && !isAuthEndpoint) {
       originalRequest._retry = true;
       const refreshToken = getRefreshToken();
 
