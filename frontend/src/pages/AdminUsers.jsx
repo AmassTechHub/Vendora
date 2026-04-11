@@ -32,7 +32,9 @@ export default function AdminUsers() {
       setUsers(usersRes.data || []);
       setInvites(invitesRes.data || []);
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to load data');
+      const msg = err.response?.data?.error || err.message || 'Failed to load data';
+      toast.error(msg);
+      console.error('AdminUsers load error:', err.response?.data || err);
     } finally { setLoading(false); }
   };
 
@@ -66,10 +68,12 @@ export default function AdminUsers() {
         role: inviteForm.role,
         expiresInHours: Number(inviteForm.expiresInHours),
       });
-      toast.success(`Invite code: ${data.code}`);
+      toast.success(`Code generated: ${data.code}`, { duration: 6000 });
       load();
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Failed to generate invite code');
+      const msg = err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to generate invite code';
+      toast.error(`Invite error: ${msg}`, { duration: 8000 });
+      console.error('Invite generation error:', err.response?.data || err);
     } finally { setGenerating(false); }
   };
 
