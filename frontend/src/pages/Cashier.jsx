@@ -2,7 +2,6 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
 import { Search, Trash2, Printer, UserCheck, X, ShoppingCart, UserPlus, CreditCard, Smartphone, Banknote } from 'lucide-react';
-
 function loadSettings() {
   try {
     const s = localStorage.getItem('vendora-settings');
@@ -55,17 +54,24 @@ export default function Cashier() {
   }, []);
 
   const searchProducts = useCallback(async (q = query) => {
-    if (!q.trim()) return;
+    if (!q.trim()) { setProducts([]); return; }
     try {
       const { data } = await api.get(`/products/search?q=${encodeURIComponent(q)}`);
       setProducts(data);
     } catch { toast.error('Search failed'); }
   }, [query]);
 
+  // Auto-search as user types (debounced 300ms)
+  useEffect(() => {
+    if (!query.trim()) { setProducts([]); return; }
+    const t = setTimeout(() => searchProducts(query), 300);
+    return () => clearTimeout(t);
+  }, [query]); // eslint-disable-line
+
   const handleSearchKey = (e) => {
     if (e.key === 'Enter') {
       if (query.match(/^\d{4,}$/)) searchByBarcode(query);
-      else searchProducts();
+      else searchProducts(query);
     }
   };
 
@@ -100,7 +106,7 @@ export default function Cashier() {
   const clearCart = () => {
     setCart([]); setDiscount(0); setAmountPaid('');
     setCustomer(null); setCustQuery(''); setCustResults([]);
-    setReceipt(null); setPaystackEmail('');
+    setReceipt(null); setPaystackEmail(''); setQuery(''); setProducts([]);
   };
 
   const searchCustomers = async () => {
@@ -134,9 +140,10 @@ export default function Cashier() {
   useEffect(() => { if (customer?.email) setPaystackEmail(customer.email); }, [customer]);
 
   const checkout = async () => {
-    if (cart.length === 0) return toast.error('Cart is empty');
-    if (paymentMethod === 'CASH' && parseFloat(amountPaid || '0') < total) {
-      return toast.error('Amount paid is less than total');
+    if (cart.length === 0) return toast.error('Add products to cart first');
+    if (paymentMethod === 'CASH') {
+      if (!amountPaid || parseFloat(amountPaid) <= 0) return toast.error('Enter amount paid');
+      if (parseFloat(amountPaid) < total) return toast.error(`Amount paid (GH₵${parseFloat(amountPaid).toFixed(2)}) is less than total (GH₵${total.toFixed(2)})`);
     }
     if ((paymentMethod === 'CARD' || paymentMethod === 'MOBILE_MONEY') && !paystackEmail) {
       return toast.error('Enter customer email for Paystack payment');
@@ -147,14 +154,17 @@ export default function Cashier() {
       // Paystack flow for CARD / MOBILE_MONEY
       if (paymentMethod === 'CARD' || paymentMethod === 'MOBILE_MONEY') {
         const key = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
-        if (!key) { toast.error('Paystack key not configured'); setProcessing(false); return; }
+        if (!key) {
+          toast.error('Paystack key not set — use Cash payment for now, or add VITE_PAYSTACK_PUBLIC_KEY in Vercel env vars');
+          setProcessing(false);
+          return;
+        }
         try {
           const psRes = await loadPaystack(key, {
             email: paystackEmail,
             amount: total,
             storeName: settings.storeName || 'Vendora',
           });
-          // Verify on backend — backend creates the sale
           const { data: verifyData } = await api.post('/payments/paystack/verify-and-create', {
             reference: psRes.reference,
             sale: {
@@ -171,11 +181,13 @@ export default function Cashier() {
           throw err;
         }
       } else {
+        // CASH — always works, no external service needed
         const { data } = await api.post('/sales', {
           customerId: customer?.id || null,
           items: cart.map(i => ({ productId: i.product.id, quantity: i.quantity })),
-          discount, paymentMethod,
-          amountPaid: parseFloat(amountPaid) || total,
+          discount,
+          paymentMethod,
+          amountPaid: parseFloat(amountPaid),
         });
         setReceipt(data);
       }
