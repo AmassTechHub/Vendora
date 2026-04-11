@@ -1,5 +1,7 @@
--- Run this ONCE in Supabase SQL Editor to create all tables.
--- Safe to re-run (uses IF NOT EXISTS).
+-- ============================================================
+-- Vendora POS — Create All Tables
+-- Run ONCE in Supabase SQL Editor. Safe to re-run.
+-- ============================================================
 
 CREATE TABLE IF NOT EXISTS users (
     id                      BIGSERIAL PRIMARY KEY,
@@ -70,30 +72,34 @@ CREATE TABLE IF NOT EXISTS customers (
 );
 
 CREATE TABLE IF NOT EXISTS shifts (
-    id                  BIGSERIAL PRIMARY KEY,
-    cashier_id          BIGINT        REFERENCES users(id) ON DELETE SET NULL,
-    start_time          TIMESTAMP     NOT NULL DEFAULT NOW(),
-    end_time            TIMESTAMP,
-    opening_cash        NUMERIC(10,2) NOT NULL DEFAULT 0,
-    closing_cash        NUMERIC(10,2),
-    expected_cash       NUMERIC(10,2),
-    variance            NUMERIC(10,2),
-    notes               TEXT,
-    status              VARCHAR(20)   NOT NULL DEFAULT 'OPEN'
+    id              BIGSERIAL PRIMARY KEY,
+    cashier_id      BIGINT        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    start_time      TIMESTAMP     NOT NULL DEFAULT NOW(),
+    end_time        TIMESTAMP,
+    opening_cash    NUMERIC(10,2) NOT NULL DEFAULT 0,
+    closing_cash    NUMERIC(10,2),
+    expected_cash   NUMERIC(10,2),
+    total_sales     INT           NOT NULL DEFAULT 0,
+    total_revenue   NUMERIC(10,2) NOT NULL DEFAULT 0,
+    cash_revenue    NUMERIC(10,2) NOT NULL DEFAULT 0,
+    notes           TEXT,
+    status          VARCHAR(20)   NOT NULL DEFAULT 'ACTIVE'
 );
 
 CREATE TABLE IF NOT EXISTS sales (
     id                  BIGSERIAL PRIMARY KEY,
-    cashier_id          BIGINT        REFERENCES users(id) ON DELETE SET NULL,
+    user_id             BIGINT        REFERENCES users(id) ON DELETE SET NULL,
     customer_id         BIGINT        REFERENCES customers(id) ON DELETE SET NULL,
     shift_id            BIGINT        REFERENCES shifts(id) ON DELETE SET NULL,
     subtotal            NUMERIC(10,2) NOT NULL DEFAULT 0,
     discount            NUMERIC(10,2) NOT NULL DEFAULT 0,
+    tax                 NUMERIC(10,2) NOT NULL DEFAULT 0,
     total_amount        NUMERIC(10,2) NOT NULL DEFAULT 0,
-    amount_paid         NUMERIC(10,2) NOT NULL DEFAULT 0,
-    change_amount       NUMERIC(10,2) NOT NULL DEFAULT 0,
-    payment_method      VARCHAR(20)   NOT NULL DEFAULT 'CASH',
+    amount_paid         NUMERIC(10,2),
+    change              NUMERIC(10,2),
+    payment_method      VARCHAR(20),
     payment_status      VARCHAR(20)   NOT NULL DEFAULT 'NOT_REQUIRED',
+    payment_provider    VARCHAR(50),
     payment_reference   VARCHAR(255),
     created_at          TIMESTAMP     NOT NULL DEFAULT NOW()
 );
@@ -146,7 +152,6 @@ CREATE TABLE IF NOT EXISTS audit_logs (
     created_at   TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
--- Verify
+-- Verify all tables created
 SELECT table_name FROM information_schema.tables
-WHERE table_schema = 'public'
-ORDER BY table_name;
+WHERE table_schema = 'public' ORDER BY table_name;
