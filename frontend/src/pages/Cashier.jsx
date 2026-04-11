@@ -53,12 +53,18 @@ export default function Cashier() {
     }
   }, []);
 
+  const [searching, setSearching] = useState(false);
+
   const searchProducts = useCallback(async (q = query) => {
     if (!q.trim()) { setProducts([]); return; }
+    setSearching(true);
     try {
       const { data } = await api.get(`/products/search?q=${encodeURIComponent(q)}`);
       setProducts(data);
-    } catch { toast.error('Search failed'); }
+      if (data.length === 0) toast('No products found for "' + q + '"', { icon: '🔍' });
+    } catch (err) {
+      toast.error('Search failed: ' + (err.response?.data?.error || err.message));
+    } finally { setSearching(false); }
   }, [query]);
 
   // Auto-search as user types (debounced 300ms)
@@ -276,8 +282,11 @@ export default function Cashier() {
               value={query}
               onChange={e => { setQuery(e.target.value); if (!e.target.value) setProducts([]); }}
               onKeyDown={handleSearchKey} />
+            {searching && (
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+            )}
           </div>
-          <button onClick={() => searchProducts()}
+          <button onClick={() => searchProducts(query)}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 rounded-xl transition">
             <Search size={16} />
           </button>
